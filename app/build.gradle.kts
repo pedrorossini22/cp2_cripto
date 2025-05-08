@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "pedrorossini22.com.githut.cp2_cripto"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "pedrorossini22.com.githut.cp2_cripto"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -65,4 +65,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation("androidx.appcompat:appcompat:1.7.0")
+
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("androidx.activity:activity-ktx:1.7.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2")
 }
