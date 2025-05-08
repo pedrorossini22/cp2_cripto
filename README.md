@@ -112,3 +112,87 @@ implementation "com.squareup.retrofit2:converter-gson:2.9.0"
 2. Configure o projeto no Android Studio.
 3. Certifique-se de que você tenha acesso à API do Mercado Bitcoin.
 4. Execute o aplicativo em um dispositivo ou emulador Android.
+
+# MercadoBitcoinServiceFactory
+
+Esta classe é responsável por criar e configurar uma instância do serviço `MercadoBitcoinService` utilizando a biblioteca Retrofit. O Retrofit é uma biblioteca popular em Android para realizar chamadas HTTP de forma simples e eficiente.
+
+## Função Principal
+
+A classe possui um único método, `create()`, que configura e retorna uma instância de `MercadoBitcoinService`. Essa instância é utilizada para realizar chamadas à API do Mercado Bitcoin.
+
+## Código
+
+```kotlin
+package carreiras.com.github.cryptomonitor.service
+
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+
+class MercadoBitcoinServiceFactory {
+
+    fun create(): MercadoBitcoinService {
+        val retrofit = Retrofit.Builder()
+            .baseUrl("https://www.mercadobitcoin.net/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        return retrofit.create(MercadoBitcoinService::class.java)
+    }
+}
+```
+
+## Explicação do Código
+
+1. **Configuração do Retrofit**:
+   - O Retrofit é configurado usando o `Retrofit.Builder()`. Nele são definidos:
+     - **`baseUrl`**: A URL base para as chamadas da API. Neste caso, a URL do Mercado Bitcoin (`https://www.mercadobitcoin.net/`).
+     - **`addConverterFactory`**: Adiciona um conversor de JSON para objetos Kotlin/Java usando o `GsonConverterFactory`. Isso permite que as respostas da API em formato JSON sejam automaticamente convertidas em objetos do tipo esperado.
+
+2. **Criação do Serviço**:
+   - Após a configuração do Retrofit, o método `create()` é chamado para criar uma instância de `MercadoBitcoinService`. Essa interface (que não foi fornecida aqui) define os endpoints e métodos para as chamadas HTTP.
+
+3. **Uso da Classe**:
+   - A classe `MercadoBitcoinServiceFactory` é usada para criar uma instância do serviço que será utilizada para realizar chamadas à API. Por exemplo:
+     ```kotlin
+     val service = MercadoBitcoinServiceFactory().create()
+     val response = service.getTicker()
+     ```
+
+4. **Facilidade de Manutenção**:
+   - Centralizar a lógica de configuração do Retrofit em uma classe separada facilita a manutenção e a reutilização do código. Caso seja necessário alterar a URL base ou o conversor, a modificação é feita em um único local.
+
+## Dependências Necessárias
+
+Certifique-se de adicionar as seguintes dependências no arquivo `build.gradle` para utilizar Retrofit e Gson:
+
+```gradle
+implementation "com.squareup.retrofit2:retrofit:2.9.0"
+implementation "com.squareup.retrofit2:converter-gson:2.9.0"
+```
+
+## Benefícios da Abordagem
+
+- **Modularidade**: A configuração do Retrofit está isolada em uma classe, o que melhora a organização do código.
+- **Reutilização**: A mesma lógica pode ser reutilizada em diferentes partes do aplicativo que precisam acessar a API do Mercado Bitcoin.
+- **Manutenção Simplificada**: Alterações na URL ou nos conversores são feitas em um único lugar.
+
+## Melhorias Futuras
+
+- Adicionar suporte para diferentes URLs base (por exemplo, ambientes de desenvolvimento e produção).
+- Implementar um cliente HTTP customizado para log de requisições ou autenticação.
+- Utilizar a biblioteca `OkHttp` para configurar interceptadores de requisições, caso necessário.
+
+## Exemplo de Uso
+
+```kotlin
+val service = MercadoBitcoinServiceFactory().create()
+val response = service.getTicker()
+
+if (response.isSuccessful) {
+    val tickerData = response.body()
+    // Processar os dados retornados
+} else {
+    // Tratar erros
+}
+```
