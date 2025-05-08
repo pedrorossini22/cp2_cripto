@@ -196,3 +196,229 @@ if (response.isSuccessful) {
     // Tratar erros
 }
 ```
+# MercadoBitcoinService
+
+Esta interface define as operações que o aplicativo pode realizar para interagir com a API do Mercado Bitcoin. Ela utiliza a biblioteca Retrofit para facilitar a comunicação com a API REST.
+
+## Função Principal
+
+A interface `MercadoBitcoinService` contém a definição de um endpoint para buscar informações do ticker (último valor, volume, data, etc.) de Bitcoin.
+
+## Código
+
+```kotlin
+package carreiras.com.github.cryptomonitor.service
+
+import carreiras.com.github.cryptomonitor.model.TickerResponse
+import retrofit2.Response
+import retrofit2.http.GET
+
+interface MercadoBitcoinService {
+
+    @GET("api/BTC/ticker/")
+    suspend fun getTicker(): Response<TickerResponse>
+}
+```
+
+## Explicação do Código
+
+1. **Anotação `@GET`**:
+   - Define o tipo de requisição HTTP que será feita. Neste caso, é uma requisição `GET` para o endpoint `api/BTC/ticker/`.
+   - O endpoint é relativo à URL base configurada no Retrofit (exemplo: `https://www.mercadobitcoin.net/`).
+
+2. **Método `getTicker`**:
+   - Método responsável por fazer a requisição ao endpoint definido.
+   - É marcado como `suspend`, o que significa que ele é uma função de suspensão e deve ser usada dentro de uma coroutine ou outra função de suspensão. Isso permite chamadas assíncronas sem bloquear a thread principal.
+
+3. **Retorno do Método**:
+   - O método retorna um `Response<TickerResponse>`, onde:
+     - **`Response`**: Representa a resposta completa da API, incluindo o código HTTP, cabeçalhos, corpo da resposta, etc.
+     - **`TickerResponse`**: Um modelo de dados (não incluído aqui) que mapeia o JSON retornado pela API para um objeto Kotlin.
+
+4. **Uso da Interface**:
+   - O Retrofit utiliza esta interface para gerar uma implementação concreta em tempo de execução. Essa implementação pode ser usada para interagir diretamente com a API.
+   - Exemplo de uso:
+     ```kotlin
+     val service = MercadoBitcoinServiceFactory().create()
+     val response = service.getTicker()
+     if (response.isSuccessful) {
+         val tickerData = response.body()
+         // Processar os dados do ticker
+     } else {
+         // Tratar erros de resposta
+     }
+     ```
+
+## Dependências Necessárias
+
+Certifique-se de incluir as seguintes dependências no arquivo `build.gradle` para usar Retrofit e o suporte a coroutines:
+
+```gradle
+implementation "com.squareup.retrofit2:retrofit:2.9.0"
+implementation "com.squareup.retrofit2:converter-gson:2.9.0"
+implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
+```
+
+## Benefícios do Retrofit
+
+- **Simplicidade**: A interface abstrai a complexidade de criar requisições HTTP manualmente.
+- **Suporte a Coroutines**: Permite chamadas assíncronas de forma simples e eficiente.
+- **Conversão Automática de JSON**: Com o uso de um `ConverterFactory` (como o `GsonConverterFactory`), o Retrofit converte automaticamente os dados JSON da API para objetos Kotlin.
+
+## Melhorias Futuras
+
+- Adicionar tratamento de erros específico para diferentes códigos HTTP.
+- Expandir a interface para incluir outros endpoints da API do Mercado Bitcoin.
+- Implementar testes para validar as chamadas da API.
+
+## Exemplo de Resposta da API
+
+Abaixo está um exemplo de como a API do Mercado Bitcoin pode retornar dados no endpoint `api/BTC/ticker/`:
+
+```json
+{
+    "ticker": {
+        "high": "300000.00",
+        "low": "290000.00",
+        "vol": "10.5",
+        "last": "295000.00",
+        "buy": "294500.00",
+        "sell": "295500.00",
+        "date": 1683513600
+    }
+}
+```
+
+Esses dados serão mapeados para a classe `TickerResponse` no código.
+
+## Exemplo de Uso em Aplicativo
+
+```kotlin
+val service = MercadoBitcoinServiceFactory().create()
+
+CoroutineScope(Dispatchers.IO).launch {
+    try {
+        val response = service.getTicker()
+        if (response.isSuccessful) {
+            val tickerData = response.body()
+            println("Último preço: ${tickerData?.ticker?.last}")
+        } else {
+            println("Erro na chamada: ${response.code()}")
+        }
+    } catch (e: Exception) {
+        println("Exceção: ${e.message}")
+    }
+}
+```
+
+Com isso, você consegue acessar os dados do ticker de Bitcoin fornecidos pela API do Mercado Bitcoin.
+
+# TickerResponse e Ticker
+
+Este arquivo define as classes de modelo `TickerResponse` e `Ticker` que representam a estrutura dos dados recebidos da API do Mercado Bitcoin. Essas classes são essenciais para mapear o JSON da resposta da API em objetos Kotlin, facilitando o uso dos dados no aplicativo.
+
+## Estrutura das Classes
+
+### TickerResponse
+
+```kotlin
+class TickerResponse(
+    val ticker: Ticker
+)
+```
+
+- **`TickerResponse`**: Esta classe é o modelo principal que representa a resposta completa da API.
+- **Propriedades**:
+  - `ticker`: Um objeto do tipo `Ticker` que contém os dados relevantes do ticker.
+
+### Ticker
+
+```kotlin
+class Ticker(
+    val high: String,
+    val low: String,
+    val vol: String,
+    val last: String,
+    val buy: String,
+    val sell: String,
+    val date: Long
+)
+```
+
+- **`Ticker`**: Esta classe representa os detalhes do ticker retornados pela API.
+- **Propriedades**:
+  - `high`: O preço mais alto do Bitcoin no período especificado.
+  - `low`: O preço mais baixo do Bitcoin no período especificado.
+  - `vol`: O volume total negociado no período.
+  - `last`: O preço da última negociação realizada.
+  - `buy`: O preço de compra mais alto disponível no momento.
+  - `sell`: O preço de venda mais baixo disponível no momento.
+  - `date`: A data e hora da última atualização do ticker, representada como um timestamp Unix (em segundos).
+
+## Exemplo de Estrutura JSON
+
+A API do Mercado Bitcoin retorna os dados no seguinte formato JSON:
+
+```json
+{
+    "ticker": {
+        "high": "300000.00",
+        "low": "290000.00",
+        "vol": "10.5",
+        "last": "295000.00",
+        "buy": "294500.00",
+        "sell": "295500.00",
+        "date": 1683513600
+    }
+}
+```
+
+As classes `TickerResponse` e `Ticker` mapeiam diretamente essa estrutura, onde:
+- O objeto `ticker` é mapeado para a classe `Ticker`.
+- Os valores internos de `ticker` (como `high`, `low`, etc.) são atribuídos às propriedades da classe `Ticker`.
+
+## Como Funciona o Mapeamento
+
+Ao usar Retrofit com um conversor como o `GsonConverterFactory`, a biblioteca converte automaticamente o JSON retornado pela API em um objeto do tipo `TickerResponse`. Por exemplo:
+
+```kotlin
+val service = MercadoBitcoinServiceFactory().create()
+val response = service.getTicker()
+
+if (response.isSuccessful) {
+    val tickerResponse = response.body()
+    println("Último preço: ${tickerResponse?.ticker?.last}")
+}
+```
+
+Nesse exemplo:
+- O JSON retornado é convertido em um objeto `TickerResponse`.
+- O preço da última negociação (`last`) pode ser acessado diretamente como `tickerResponse?.ticker?.last`.
+
+## Benefícios do Modelo
+
+- **Facilidade de Uso**: Permite acessar os dados da API diretamente como propriedades Kotlin.
+- **Tipo Seguro**: Usa tipos Kotlin para garantir que os dados recebidos estejam no formato esperado.
+- **Integração Simples**: Compatível com Retrofit e Gson para conversão automática de JSON.
+
+## Melhorias Futuras
+
+- Adicionar validação de dados para garantir que os valores recebidos estejam no formato esperado.
+- Alterar os tipos de propriedades como `high`, `low`, `vol`, `last`, `buy` e `sell` para `Double` (ao invés de `String`) para facilitar cálculos financeiros.
+- Implementar métodos para formatar os valores (por exemplo, formatar o timestamp `date` como uma data legível para humanos).
+
+## Exemplo de Uso
+
+```kotlin
+fun printTickerInfo(ticker: Ticker) {
+    println("Preço mais alto: ${ticker.high}")
+    println("Preço mais baixo: ${ticker.low}")
+    println("Volume negociado: ${ticker.vol}")
+    println("Último preço: ${ticker.last}")
+    println("Preço de compra: ${ticker.buy}")
+    println("Preço de venda: ${ticker.sell}")
+    println("Data da última atualização: ${Date(ticker.date * 1000L)}")
+}
+```
+
+Com estas classes, o aplicativo está pronto para processar os dados retornados pela API do Mercado Bitcoin de forma eficiente e organizada.
